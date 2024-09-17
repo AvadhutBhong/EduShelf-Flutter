@@ -1,3 +1,6 @@
+import 'package:edu_shelf/screens/category_products.dart';
+import 'package:edu_shelf/services/shared_pref.dart';
+import 'package:edu_shelf/widgets/greeting_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:edu_shelf/colors.dart';
 import 'package:edu_shelf/widgets/support_widget.dart';
@@ -15,14 +18,40 @@ class _HomePageState extends State<HomePage> {
     "images/book.png",
     "images/calculator.png",
     "images/drafting_tools.png",
-
-
   ];
+  List categoryNames = [
+    "TextBook",
+    "Calculator",
+    "Graphics Tools",
+  ];
+
+  String? name,image;
+
+  getTheSharedPref() async {
+    name = await SharedPreferenceHelper().getUserName();
+    image = await SharedPreferenceHelper().getUserImage();
+    setState(() {
+
+    });
+  }
+
+  ontheload() async {
+    await getTheSharedPref();
+    setState(() {
+
+    });
+  }
+
+  @override
+  void initState() {
+    ontheload();
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
-      body: Container(
+      body: name==null ? Center(child: CircularProgressIndicator()) : Container(
         margin: const EdgeInsets.only(top: 50.0, left: 20.0, right: 20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,22 +63,19 @@ class _HomePageState extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Hey, Avadhut',
+                      'Hey, '+name!,
                       style: AppWidget.boldTextFieldStyle(), // Use AppWidget for text style
                     ),
-                    Text(
-                      'Good Morning',
-                      style: AppWidget.lightTextFieldStyle(), // Use AppWidget for text style
-                    ),
+                    GreetingWidget(),
                   ],
                 ),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(30),
-                  child: Image.asset(
-                    'images/avatar.png',
+                  child: Image.network(
+                    image!,
                     height: 50,
-                    width: 50,
-                    fit: BoxFit.fill,
+                    width: 60,
+                    fit: BoxFit.cover,
                   ),
                 ),
               ],
@@ -102,7 +128,7 @@ class _HomePageState extends State<HomePage> {
                         itemCount: categories.length,
                         scrollDirection: Axis.horizontal,
                         itemBuilder: (context,index){
-                  return CategoryTile(image: categories[index]);
+                  return CategoryTile(image: categories[index], name: categoryNames[index],);
                     }),
                   ),
                 ),
@@ -141,13 +167,13 @@ class _HomePageState extends State<HomePage> {
 
 class CategoryTile extends StatelessWidget {
   
-    String image;
-    CategoryTile({required this.image});
+    String image,name;
+    CategoryTile({required this.image, required this.name});
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: (){
-
+            Navigator.push(context, MaterialPageRoute(builder: (context)=> CategoryProducts(category: name)));
       },
       child: Container(
         padding: EdgeInsets.all(20),

@@ -17,7 +17,7 @@ class SignUpScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<SignUpScreen> {
   String ? name, email, password;
-  bool isPasswordVisible=true;
+  bool isPasswordVisible=false;
   TextEditingController namecontroller = new TextEditingController();
   TextEditingController emailcontroller = new TextEditingController();
   TextEditingController passwordcontroller = new TextEditingController();
