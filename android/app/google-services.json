@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "860897937575",
+    "project_id": "edushelf-f249f",
+    "storage_bucket": "edushelf-f249f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:860897937575:android:c7c9af989193dd07b93382",
+        "android_client_info": {
+          "package_name": "com.edushelf.edu_shelf"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCtWH3CGNglurVn6JSKiA2BqF2UzW5z-tY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
