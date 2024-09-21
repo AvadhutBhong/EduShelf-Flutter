@@ -82,7 +82,7 @@ class MyApp extends StatelessWidget {
       ),
       onGenerateRoute: AppRoutes.generateRoute,
       // initialRoute: AppRoutes.splash,
-      home: BottomNavbar(),
+      home: AddProduct(),
     );
   }
 }
