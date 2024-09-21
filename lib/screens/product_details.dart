@@ -66,17 +66,29 @@ class _ProductDetailsState extends State<ProductDetails> {
                     SizedBox(height: 10,),
                     Text(widget.detail),
                     SizedBox(height: 90,),
-                    Container(
-                      padding: EdgeInsets.symmetric(vertical: 10.0),
-                      decoration: BoxDecoration(
-                        color: Color(0xFFfd6f3e),
-                        borderRadius: BorderRadius.circular(10),
+
+                Center(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      // Add your onPressed functionality here
+                      // Navigator.pushNamed(context, "/personalchat");
+                    },
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.black, backgroundColor: Colors.white, // Text color
+                      side: BorderSide(color: Colors.black, width: 2), // Border color and width
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10), // Rounded border
                       ),
-                      width: MediaQuery.of(context).size.width,
-                      child: Center(
-                        child: Text('Buy Now', style: TextStyle(color: AppColors.offWhite, fontSize: 20, fontWeight: FontWeight.bold),),
+                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12), // Button padding
+                    ),
+                    child: Text(
+                      'CHAT WITH OWNER',
+                      style: TextStyle(
+                        fontSize: 16, // Text size
+                        fontWeight: FontWeight.bold, // Text style
                       ),
-                    )
+                    ),
+                  ),),
                   ],
                 ),
               ),

@@ -1,8 +1,10 @@
 import 'package:edu_shelf/admin/add_product.dart';
 import 'package:edu_shelf/admin/admin_login.dart';
 import 'package:edu_shelf/app_routes.dart';
+import 'package:edu_shelf/screens/chat_screen.dart';
 import 'package:edu_shelf/screens/home.dart';
 import 'package:edu_shelf/screens/login_screen.dart';
+import 'package:edu_shelf/screens/phone_login_screen.dart';
 import 'package:edu_shelf/screens/product_details.dart';
 import 'package:edu_shelf/screens/signin_screen.dart';
 import 'package:edu_shelf/widgets/botton_navbar.dart';
@@ -35,7 +37,7 @@ class MyApp extends StatelessWidget {
         colorScheme:const ColorScheme(
           primary: AppColors.darkGray, // Dark Gray as primary
           secondary: AppColors.lightGray, // Light Gray as secondary
-          surface: AppColors.offWhite, // Off White as surface color
+          surface: AppColors.white, // Off White as surface color
           background: AppColors.white, // Background color
           error: Colors.red,
           onPrimary: AppColors.white, // Text color on dark surfaces
@@ -80,7 +82,7 @@ class MyApp extends StatelessWidget {
       ),
       onGenerateRoute: AppRoutes.generateRoute,
       // initialRoute: AppRoutes.splash,
-      home:SignUpScreen(),
+      home: BottomNavbar(),
     );
   }
 }

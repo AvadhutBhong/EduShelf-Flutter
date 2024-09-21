@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edu_shelf/colors.dart';
+import 'package:edu_shelf/screens/phone_login_screen.dart';
 import 'package:edu_shelf/services/database.dart';
 import 'package:edu_shelf/services/shared_pref.dart';
 import 'package:edu_shelf/widgets/support_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:random_string/random_string.dart';
 
 
@@ -74,6 +76,60 @@ class _LoginScreenState extends State<SignUpScreen> {
       }
     }
   }
+
+  Future<void> signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final GoogleSignInAuthentication googleAuth = await googleUser!.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+
+      if (userCredential.user != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              backgroundColor: Colors.green,
+              content: Text('Signed in with Google successfully', style: AppWidget.semiboldTextFieldStyle()),
+            )
+        );
+
+        String Id = userCredential.user!.uid;
+        await SharedPreferenceHelper().saveUserId(Id);
+        await SharedPreferenceHelper().saveUserName(userCredential.user!.displayName ?? "");
+        await SharedPreferenceHelper().saveUserEmail(userCredential.user!.email ?? "");
+        await SharedPreferenceHelper().saveUserImage(userCredential.user!.photoURL ?? "");
+
+        Map<String, dynamic> userInfoMap = {
+          "Name": userCredential.user!.displayName,
+          "Email": userCredential.user!.email,
+          "id": Id,
+          "Image": userCredential.user!.photoURL
+        };
+
+        await DatabaseMethods().addUserDetails(userInfoMap, Id);
+        Navigator.pushNamed(context, '/bottomnav');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            backgroundColor: Colors.redAccent,
+            content: Text('Error signing in with Google', style: AppWidget.semiboldTextFieldStyle()),
+          )
+      );
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -291,6 +347,7 @@ class _LoginScreenState extends State<SignUpScreen> {
                           minimumSize: const Size(48, 48),
                         ),
                         onPressed: () {
+                          signInWithGoogle();
                           // Implement Google sign-in logic here
                         },
                         child: Image.asset("images/google.png", height: 25,width: 25,),
@@ -308,7 +365,7 @@ class _LoginScreenState extends State<SignUpScreen> {
             
                         ),
                         onPressed: () {
-                          // Implement Google sign-in logic here
+                          Navigator.push(context, MaterialPageRoute(builder: (_)=> PhoneLoginScreen()));
                         },
                         child: Icon(Icons.phone),
                       ),

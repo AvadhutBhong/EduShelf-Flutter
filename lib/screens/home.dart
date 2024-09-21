@@ -74,7 +74,7 @@ class _HomePageState extends State<HomePage> {
                   child: Image.network(
                     image!,
                     height: 50,
-                    width: 60,
+                    width: 50,
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -96,6 +96,7 @@ class _HomePageState extends State<HomePage> {
                   hintStyle: AppWidget.lightTextFieldStyle().copyWith(
                     color: AppColors.darkGray,
                   ),
+
                 ),
               ),
             ),

@@ -1,6 +1,7 @@
 import 'package:edu_shelf/admin/admin_home.dart';
 import 'package:edu_shelf/screens/home.dart';
 import 'package:edu_shelf/screens/login_screen.dart';
+import 'package:edu_shelf/screens/personal_chat_screen.dart';
 import 'package:edu_shelf/screens/signin_screen.dart';
 import 'package:edu_shelf/screens/splash_screen.dart';
 import 'package:edu_shelf/widgets/botton_navbar.dart';
@@ -14,6 +15,7 @@ class AppRoutes {
   static const String home = '/home';
   static const String bottomnav = '/bottomnav';
   static const String adminhome = '/adminhome';
+  static const String personalchat = '/personalchat';
 
   // Generate the route based on the name
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -21,17 +23,19 @@ class AppRoutes {
       case login:
         return MaterialPageRoute(builder: (_) => LoginScreen());
       case splash:
-        return MaterialPageRoute(builder: (_)=> SplashScreen());
-        case signin:
-        return MaterialPageRoute(builder: (_)=> SignUpScreen());
+        return MaterialPageRoute(builder: (_) => SplashScreen());
+      case signin:
+        return MaterialPageRoute(builder: (_) => SignUpScreen());
       case home:
-        return MaterialPageRoute(builder: (_)=> HomePage());
+        return MaterialPageRoute(builder: (_) => HomePage());
       case bottomnav:
-        return MaterialPageRoute(builder: (_)=> BottomNavbar());
-        case adminhome:
-        return MaterialPageRoute(builder: (_)=> AdminHome());
+        return MaterialPageRoute(builder: (_) => BottomNavbar());
+      case adminhome:
+        return MaterialPageRoute(builder: (_) => AdminHome());
+      // case personalchat:
+      //   return MaterialPageRoute(builder: (_) => PersonalChatScreen());
       default:
-      // Return a default route or error page
+        // Return a default route or error page
         return MaterialPageRoute(
           builder: (_) => Scaffold(
             appBar: AppBar(title: Text('Error')),

@@ -12,7 +12,20 @@
           "package_name": "com.edushelf.edu_shelf"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "860897937575-157qkchn45hookdbht5j3abmiaei36tn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.edushelf.edu_shelf",
+            "certificate_hash": "bd7ea35c2739bfad3a7f2b2d586e4042e03e6f06"
+          }
+        },
+        {
+          "client_id": "860897937575-p857bo7n5c4d51kpjan370rvbmsd0slq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCtWH3CGNglurVn6JSKiA2BqF2UzW5z-tY"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "860897937575-p857bo7n5c4d51kpjan370rvbmsd0slq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "860897937575-oc6nei3aj23brd4btur41ts8s84uhufl.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.edushelf.eduShelf.RunnerTests"
+              }
+            }
+          ]
         }
       }
     }
