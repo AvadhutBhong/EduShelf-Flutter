@@ -43,12 +43,30 @@ class PreSellPage extends StatelessWidget {
                 child: Container(
                   width: 200,
                   height: 200,
-                  child: Image.asset(
-                    "images/avatar.png", // Placeholder image or GIF
-                    fit: BoxFit.contain,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Book Image in the background
+                      Image.asset(
+                        "images/book_sell.png",
+                        fit: BoxFit.contain,
+                        width: 180, // Adjusted to fit within the container
+                      ),
+                      // Rupees Symbol on top of the book image
+                      Positioned(
+                        top: 10, // Adjusted position for better layout
+                        left: 10,
+                        child: Image.asset(
+                          "images/rupee.png",
+                          width: 50, // Adjusted to the appropriate size
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
+
               SizedBox(height: 30),
 
               // Sell Benefits

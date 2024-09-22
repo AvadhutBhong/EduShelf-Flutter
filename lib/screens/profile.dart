@@ -1,3 +1,4 @@
+import 'package:edu_shelf/services/shared_pref.dart';
 import 'package:flutter/material.dart';
 
 class Profile extends StatefulWidget {
@@ -9,6 +10,33 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   bool isDarkMode = false;
+  String? username;
+  String? useremail;
+  String? userImage;
+  String? userphone;
+  String? userid;
+
+  getSharedPref() async{
+    username = await SharedPreferenceHelper().getUserName();
+    useremail = await SharedPreferenceHelper().getUserEmail();
+    userImage = await SharedPreferenceHelper().getUserImage();
+    userid = await SharedPreferenceHelper().getUserId();
+    setState(() {
+
+    });
+  }
+
+  onTheLoad() async{
+    await getSharedPref();
+    setState(() {
+    });
+  }
+
+  @override
+  void initState() {
+    onTheLoad();
+    super.initState();
+  }
 
   void toggleTheme(bool value) {
     setState(() {
@@ -16,9 +44,14 @@ class _ProfileState extends State<Profile> {
     });
   }
 
+  Future<String> getphone() async{
+    userphone = await SharedPreferenceHelper().getUserPhone(userid!);
+    return userphone!;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return username==null ? CircularProgressIndicator():Scaffold(
       backgroundColor: isDarkMode ? Colors.black : Colors.white,
       appBar: AppBar(
         backgroundColor: isDarkMode ? Colors.black : Colors.white,
@@ -46,12 +79,12 @@ class _ProfileState extends State<Profile> {
             CircleAvatar(
               radius: 50,
               backgroundImage: NetworkImage(
-                "https://w7.pngwing.com/pngs/340/946/png-transparent-avatar-user-computer-icons-software-developer-avatar-child-face-heroes.png",
+                userImage!,
               ),
             ),
             const SizedBox(height: 10),
             Text(
-              'User Name',
+              username!,
               style: TextStyle(
                 color: isDarkMode ? Colors.white : Colors.black,
                 fontSize: 24,
@@ -60,7 +93,14 @@ class _ProfileState extends State<Profile> {
             ),
             const SizedBox(height: 5),
             Text(
-              'user@example.com',
+              '0000000000',
+              style: TextStyle(
+                color: isDarkMode ? Colors.grey : Colors.black54,
+                fontSize: 16,
+              ),
+            ),
+            Text(
+              useremail!,
               style: TextStyle(
                 color: isDarkMode ? Colors.grey : Colors.black54,
                 fontSize: 16,

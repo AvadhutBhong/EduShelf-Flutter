@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:edu_shelf/services/database.dart';
+import 'package:edu_shelf/services/shared_pref.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icon_snackbar/flutter_icon_snackbar.dart';
@@ -14,9 +15,26 @@ class AddProduct extends StatefulWidget {
 }
 
 class _AddProductState extends State<AddProduct> {
+  String? userid;
   bool isAdded = false;
   final ImagePicker _picker = ImagePicker();
   File? selectedImage;
+
+  getSharedpref() async {
+    userid = await SharedPreferenceHelper().getUserId();
+    setState(() {});
+  }
+
+  onTheLoad() async {
+    await getSharedpref();
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    onTheLoad();
+    super.initState();
+  }
 
   TextEditingController nameController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
@@ -39,13 +57,17 @@ class _AddProductState extends State<AddProduct> {
   }
 
   Future<void> uploadImage() async {
-    if (_formKey.currentState!.validate() && selectedImage != null && categoryValue != null && conditionValue != null) {
+    if (_formKey.currentState!.validate() &&
+        selectedImage != null &&
+        categoryValue != null &&
+        conditionValue != null) {
       setState(() {
         isAdded = true; // Start the animation
       });
 
       String addId = randomAlphaNumeric(10);
-      Reference firebaseStorageRef = FirebaseStorage.instance.ref().child("productImages").child(addId);
+      Reference firebaseStorageRef =
+      FirebaseStorage.instance.ref().child("productImages").child(addId);
       final UploadTask task = firebaseStorageRef.putFile(selectedImage!);
       var downloadUrl = await (await task).ref.getDownloadURL();
 
@@ -60,18 +82,49 @@ class _AddProductState extends State<AddProduct> {
         "sellerContact": sellerContactController.text,
       };
 
-      await DatabaseMethods().addProduct(addProductMap, categoryValue!).then((value) {
+      // Check if phone exists in shared preferences
+      // Check if phone exists in shared preferences
+      String? savedPhone = await SharedPreferenceHelper().getUserPhone(userid!); // Pass userId when retrieving phone number
+      print('Received saved number: $savedPhone');
+
+// Compare the saved number with the newly entered number
+      String enteredPhone = sellerContactController.text.toString();
+
+      if (savedPhone == null || savedPhone.isEmpty || savedPhone != enteredPhone) {
+        // If the phone number is different from the saved one, update Firestore and Shared Preferences
+        print('Phone number is new or changed, adding/updating.');
+
+        // Update Firestore with the new phone number
+        await DatabaseMethods().addUserDetails({
+          "phone": enteredPhone,
+        }, userid!);
+
+        // Save the new phone number to shared preferences using userId
+        await SharedPreferenceHelper().saveUserPhone(userid!, enteredPhone);
+      } else {
+        print("Phone number already exists and is the same.");
+      }
+
+
+      // Add product to Firestore
+      await DatabaseMethods()
+          .addProduct(addProductMap, categoryValue!)
+          .then((value) {
         selectedImage = null;
         nameController.clear();
         descriptionController.clear();
         priceController.clear();
         quantityController.clear();
         sellerContactController.clear();
+
         setState(() {
           categoryValue = null;
           conditionValue = null;
         });
-        IconSnackBar.show(context, label: 'Product added successfully', snackBarType: SnackBarType.success);
+
+        IconSnackBar.show(context,
+            label: 'Product added successfully',
+            snackBarType: SnackBarType.success);
       });
 
       Future.delayed(Duration(seconds: 2), () {
@@ -81,8 +134,7 @@ class _AddProductState extends State<AddProduct> {
       });
     } else {
       IconSnackBar.show(context,
-          label: 'Please fill in all fields',
-          snackBarType: SnackBarType.fail);
+          label: 'Please fill in all fields', snackBarType: SnackBarType.fail);
     }
   }
 
@@ -123,7 +175,9 @@ class _AddProductState extends State<AddProduct> {
                     border: Border.all(color: Colors.black12),
                   ),
                   child: selectedImage == null
-                      ? Center(child: Icon(Icons.camera_alt, size: 50, color: Colors.grey[700]))
+                      ? Center(
+                      child: Icon(Icons.camera_alt,
+                          size: 50, color: Colors.grey[700]))
                       : ClipRRect(
                     borderRadius: BorderRadius.circular(20),
                     child: Image.file(selectedImage!, fit: BoxFit.cover),
@@ -133,33 +187,44 @@ class _AddProductState extends State<AddProduct> {
               SizedBox(height: 20),
 
               // Product Name
-              buildTextField("Product Name", nameController, "Enter product name"),
+              buildTextField("Product Name", nameController,
+                  "Enter product name"),
 
               // Product Description
-              buildTextField("Description", descriptionController, "Enter product description", maxLines: 4),
+              buildTextField("Description", descriptionController,
+                  "Enter product description",
+                  maxLines: 4),
 
               // Price Field
-              buildTextField("Price (INR)", priceController, "Enter price", keyboardType: TextInputType.number),
+              buildTextField("Price (INR)", priceController,
+                  "Enter price",
+                  keyboardType: TextInputType.number),
 
               // Quantity Field
-              buildTextField("Quantity", quantityController, "Enter quantity", keyboardType: TextInputType.number),
+              buildTextField("Quantity", quantityController,
+                  "Enter quantity",
+                  keyboardType: TextInputType.number),
 
               // Category Dropdown
-              buildDropdown("Category", categoryItems, categoryValue, (String? newValue) {
-                setState(() {
-                  categoryValue = newValue;
-                });
-              }),
+              buildDropdown("Category", categoryItems, categoryValue,
+                      (String? newValue) {
+                    setState(() {
+                      categoryValue = newValue;
+                    });
+                  }),
 
               // Condition Dropdown (New/Used)
-              buildDropdown("Condition", conditionItems, conditionValue, (String? newValue) {
-                setState(() {
-                  conditionValue = newValue;
-                });
-              }),
+              buildDropdown("Condition", conditionItems, conditionValue,
+                      (String? newValue) {
+                    setState(() {
+                      conditionValue = newValue;
+                    });
+                  }),
 
               // Seller Contact
-              buildTextField("Seller Contact", sellerContactController, "Enter your contact number", keyboardType: TextInputType.phone),
+              buildTextField("Seller Contact", sellerContactController,
+                  "Enter your contact number",
+                  keyboardType: TextInputType.phone),
 
               SizedBox(height: 40),
 
@@ -187,7 +252,10 @@ class _AddProductState extends State<AddProduct> {
                           ? Icon(Icons.check, color: Colors.white)
                           : Text(
                         'Add Product',
-                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18),
                       ),
                     ),
                   ),
@@ -201,7 +269,9 @@ class _AddProductState extends State<AddProduct> {
   }
 
   // Reusable method for input fields
-  Widget buildTextField(String label, TextEditingController controller, String hint, {TextInputType? keyboardType, int maxLines = 1}) {
+  Widget buildTextField(String label, TextEditingController controller,
+      String hint,
+      {TextInputType? keyboardType, int maxLines = 1}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

@@ -26,56 +26,70 @@ class _LoginScreenState extends State<SignUpScreen> {
 
   final _formkey = GlobalKey<FormState>();
 
-  registration () async {
-    if(name != null && password != null && email != null){
-      try{
-        UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email! ,password: password!);
+  registration() async {
+    if (name != null && password != null && email != null) {
+      try {
+        UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email!, password: password!);
 
+        // Get the user ID after successful registration
+        String userId = userCredential.user!.uid;
+
+        // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+            SnackBar(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10.0),
               ),
               backgroundColor: Colors.green,
-              content: Text('Registered Successfully',style: AppWidget.semiboldTextFieldStyle(), ))
+              content: Text('Registered Successfully', style: AppWidget.semiboldTextFieldStyle()),
+            )
         );
-        String Id = randomAlphaNumeric(10);
-        await SharedPreferenceHelper().saveUserId(Id);
+
+        // Save user data to shared preferences
+        await SharedPreferenceHelper().saveUserId(userId);
         await SharedPreferenceHelper().saveUserName(namecontroller.text);
         await SharedPreferenceHelper().saveUserEmail(emailcontroller.text);
         await SharedPreferenceHelper().saveUserImage("https://w7.pngwing.com/pngs/340/946/png-transparent-avatar-user-computer-icons-software-developer-avatar-child-face-heroes.png");
-        Map<String , dynamic> userInfoMap= {
+
+        // Prepare user info map
+        Map<String, dynamic> userInfoMap = {
           "Name": namecontroller.text,
-          "Email":emailcontroller.text,
-          "id":Id,
-          "Image": "https://w7.pngwing.com/pngs/340/946/png-transparent-avatar-user-computer-icons-software-developer-avatar-child-face-heroes.png"
+          "Email": emailcontroller.text,
+          "id": userId,  // Use the correct user ID
+          "Image": "https://w7.pngwing.com/pngs/340/946/png-transparent-avatar-user-computer-icons-software-developer-avatar-child-face-heroes.png",
+          "phone": "",
         };
-        await DatabaseMethods().addUserDetails(userInfoMap, Id);
+
+        // Add user details to Firestore
+        await DatabaseMethods().addUserDetails(userInfoMap, userId!);  // Ensure to pass userId here
         Navigator.pushNamed(context, '/bottomnav');
 
-      }on FirebaseException catch(e){
-          if(e.code =="weak-password"){
-            ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    backgroundColor: Colors.redAccent,
-                    content: Text('Password provided is too weak',style: AppWidget.semiboldTextFieldStyle(), ))
-            );
-          }else if(e.code == "email-already-in-use"){
-            ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    backgroundColor: Colors.redAccent,
-                    content: Text('Email already in use',style: AppWidget.semiboldTextFieldStyle(), ))
-            );
-          }
+      } on FirebaseException catch (e) {
+        if (e.code == "weak-password") {
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                backgroundColor: Colors.redAccent,
+                content: Text('Password provided is too weak', style: AppWidget.semiboldTextFieldStyle()),
+              )
+          );
+        } else if (e.code == "email-already-in-use") {
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                backgroundColor: Colors.redAccent,
+                content: Text('Email already in use', style: AppWidget.semiboldTextFieldStyle()),
+              )
+          );
+        }
       }
     }
   }
+
 
   Future<void> signInWithGoogle() async {
     try {

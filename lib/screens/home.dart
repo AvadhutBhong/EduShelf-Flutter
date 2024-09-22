@@ -51,121 +51,124 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
-      body:  Container(
-        margin: const EdgeInsets.only(top: 50.0, left: 20.0, right: 20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      name != null ? 'Hey, ' + name! : 'Hey, Guest',
-                      style: AppWidget.boldTextFieldStyle(),
+      body:  SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: Container(
+          margin: const EdgeInsets.only(top: 50.0, left: 20.0, right: 20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name != null ? 'Hey, ' + name! : 'Hey, Guest',
+                        style: AppWidget.boldTextFieldStyle(),
+                      ),
+                      GreetingWidget(),
+                    ],
+                  ),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(30),
+                    child: image != null
+                        ? Image.network(
+                      image!,
+                      height: 50,
+                      width: 50,
+                      fit: BoxFit.cover,
+                    )
+                        : Container(
+                      height: 50,
+                      width: 50,
+                      color: Colors.grey,
+                      child: Icon(Icons.person, color: Colors.white),
                     ),
-                    GreetingWidget(),
-                  ],
-                ),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(30),
-                  child: image != null
-                      ? Image.network(
-                    image!,
-                    height: 50,
-                    width: 50,
-                    fit: BoxFit.cover,
-                  )
-                      : Container(
-                    height: 50,
-                    width: 50,
-                    color: Colors.grey,
-                    child: Icon(Icons.person, color: Colors.white),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 30.0),
-            Container(
-              decoration: BoxDecoration(
-                border: Border.all(width: 1, color: AppColors.lightGray),
-                color: AppColors.lightestGray,
-                borderRadius: BorderRadius.circular(10),
+                ],
               ),
-              width: MediaQuery.of(context).size.width,
-              child: TextField(
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintText: "Search Products",
-                  prefixIcon: Icon(Icons.search, color: AppColors.darkGray),
-                  hintStyle: AppWidget.lightTextFieldStyle().copyWith(
-                    color: AppColors.darkGray,
-                  ),
+              const SizedBox(height: 30.0),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(width: 1, color: AppColors.lightGray),
+                  color: AppColors.lightestGray,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                width: MediaQuery.of(context).size.width,
+                child: TextField(
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: "Search Products",
+                    prefixIcon: Icon(Icons.search, color: AppColors.darkGray),
+                    hintStyle: AppWidget.lightTextFieldStyle().copyWith(
+                      color: AppColors.darkGray,
+                    ),
 
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 20.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Categories', style: AppWidget.semiboldTextFieldStyle(),),
-                Text('see all', style: TextStyle(color: Color(0xFFfd6f3e), fontSize: 18, fontWeight: FontWeight.bold),),
+              const SizedBox(height: 20.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Categories', style: AppWidget.semiboldTextFieldStyle(),),
+                  Text('see all', style: TextStyle(color: Color(0xFFfd6f3e), fontSize: 18, fontWeight: FontWeight.bold),),
 
-              ],
-            ),
-            SizedBox(height: 20,),
-            Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(20),
-                  height: 150,
-                  decoration: BoxDecoration(
-                    color: Color(0xFFF08000),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Center(child: Text('All' , style: TextStyle(color: Colors.white , fontWeight: FontWeight.bold, fontSize: 20),)),
-                ),
-                Expanded(
-                  child: Container(
+                ],
+              ),
+              SizedBox(height: 20,),
+              Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(20),
                     height: 150,
-                    child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: categories.length,
-                        scrollDirection: Axis.horizontal,
-                        itemBuilder: (context,index){
-                  return CategoryTile(image: categories[index], name: categoryNames[index],);
-                    }),
+                    decoration: BoxDecoration(
+                      color: Color(0xFFF08000),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(child: Text('All' , style: TextStyle(color: Colors.white , fontWeight: FontWeight.bold, fontSize: 20),)),
                   ),
-                ),
-              ],
-            ),
-            SizedBox(height: 20,),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('All Products', style: AppWidget.semiboldTextFieldStyle(),),
-                Text('see all', style: TextStyle(color: Color(0xFFfd6f3e), fontSize: 18, fontWeight: FontWeight.bold),),
+                  Expanded(
+                    child: Container(
+                      height: 150,
+                      child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: categories.length,
+                          scrollDirection: Axis.horizontal,
+                          itemBuilder: (context,index){
+                    return CategoryTile(image: categories[index], name: categoryNames[index],);
+                      }),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20,),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('All Products', style: AppWidget.semiboldTextFieldStyle(),),
+                  Text('see all', style: TextStyle(color: Color(0xFFfd6f3e), fontSize: 18, fontWeight: FontWeight.bold),),
 
-              ],
-            ),
-            SizedBox(height: 20),
-            Container(
-              height: 240,
-                child: ListView(
-                  shrinkWrap: true,
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    HomeProductCard(img: "images/book.png",  product_name: "Bluebook",price: 50,),
-                    HomeProductCard(img: "images/book.png",  product_name: "Bluebook",price: 50,),
-                  ],
-                ),
-            ),
+                ],
+              ),
+              SizedBox(height: 20),
+              Container(
+                height: 240,
+                  child: ListView(
+                    shrinkWrap: true,
+                    scrollDirection: Axis.horizontal,
+                    children: [
+                      HomeProductCard(img: "images/book.png",  product_name: "Bluebook",price: 50,),
+                      HomeProductCard(img: "images/book.png",  product_name: "Bluebook",price: 50,),
+                    ],
+                  ),
+              ),
 
 
-          ],
+            ],
+          ),
         ),
       ),
     );
