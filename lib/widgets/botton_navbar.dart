@@ -1,8 +1,10 @@
+import 'package:edu_shelf/admin/admin_home.dart';
+import 'package:edu_shelf/admin/admin_login.dart';
+import 'package:edu_shelf/screens/pre_sell_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:edu_shelf/colors.dart';
 import 'package:edu_shelf/screens/chat_screen.dart';
 import 'package:edu_shelf/screens/home.dart';
-import 'package:edu_shelf/screens/order.dart';
 import 'package:edu_shelf/screens/profile.dart';
 
 class BottomNavbar extends StatefulWidget {
@@ -15,7 +17,7 @@ class BottomNavbar extends StatefulWidget {
 class _BottomNavbarState extends State<BottomNavbar> {
   late List<Widget> pages;
   late HomePage homepage;
-  late Order order;
+  late PreSellPage sellproduct;
   late Profile profile;
   late ChatScreen chatScreen;
   int currentTabIndex = 0;
@@ -23,10 +25,10 @@ class _BottomNavbarState extends State<BottomNavbar> {
   @override
   void initState() {
     homepage = HomePage();
-    order = Order(); // This represents the "Sell Product" section
+    sellproduct = PreSellPage(); // This represents the "Sell Product" section
     profile = Profile();
     chatScreen = ChatScreen();
-    pages = [homepage, order, chatScreen, profile];
+    pages = [homepage, sellproduct, chatScreen, profile];
     super.initState();
   }
 
@@ -70,24 +72,25 @@ class _BottomNavbarState extends State<BottomNavbar> {
               label: 'Home',
             ),
             _buildNavItem(
-              index: 1,
+              index: 1, // Change to 1
               icon: Icons.storefront_outlined,
               activeIcon: Icons.storefront_rounded,
               label: 'Sell',
             ),
             _buildNavItem(
-              index: 2,
+              index: 2, // Change to 2
               icon: Icons.chat_bubble_outline,
               activeIcon: Icons.chat_bubble_rounded,
               label: 'Chat',
             ),
             _buildNavItem(
-              index: 3,
+              index: 3, // Change to 3
               icon: Icons.person_outline,
               activeIcon: Icons.person_rounded,
               label: 'Profile',
             ),
           ],
+
         ),
       ),
       body: pages[currentTabIndex],

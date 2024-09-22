@@ -30,10 +30,10 @@ class _HomePageState extends State<HomePage> {
   getTheSharedPref() async {
     name = await SharedPreferenceHelper().getUserName();
     image = await SharedPreferenceHelper().getUserImage();
-    setState(() {
-
-    });
+    print('Fetched Name: $name, Fetched Image: $image'); // Debugging line
+    setState(() {});
   }
+
 
   ontheload() async {
     await getTheSharedPref();
@@ -51,7 +51,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.white,
-      body: name==null ? Center(child: CircularProgressIndicator()) : Container(
+      body:  Container(
         margin: const EdgeInsets.only(top: 50.0, left: 20.0, right: 20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,19 +63,26 @@ class _HomePageState extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Hey, '+name!,
-                      style: AppWidget.boldTextFieldStyle(), // Use AppWidget for text style
+                      name != null ? 'Hey, ' + name! : 'Hey, Guest',
+                      style: AppWidget.boldTextFieldStyle(),
                     ),
                     GreetingWidget(),
                   ],
                 ),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(30),
-                  child: Image.network(
+                  child: image != null
+                      ? Image.network(
                     image!,
                     height: 50,
                     width: 50,
                     fit: BoxFit.cover,
+                  )
+                      : Container(
+                    height: 50,
+                    width: 50,
+                    color: Colors.grey,
+                    child: Icon(Icons.person, color: Colors.white),
                   ),
                 ),
               ],
@@ -167,7 +174,7 @@ class _HomePageState extends State<HomePage> {
 
 
 class CategoryTile extends StatelessWidget {
-  
+
     String image,name;
     CategoryTile({required this.image, required this.name});
   @override

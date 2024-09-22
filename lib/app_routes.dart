@@ -1,3 +1,4 @@
+import 'package:edu_shelf/admin/add_product.dart';
 import 'package:edu_shelf/admin/admin_home.dart';
 import 'package:edu_shelf/screens/home.dart';
 import 'package:edu_shelf/screens/login_screen.dart';
@@ -16,6 +17,7 @@ class AppRoutes {
   static const String bottomnav = '/bottomnav';
   static const String adminhome = '/adminhome';
   static const String personalchat = '/personalchat';
+  static const String addproduct = '/addproduct';
 
   // Generate the route based on the name
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -30,8 +32,8 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => HomePage());
       case bottomnav:
         return MaterialPageRoute(builder: (_) => BottomNavbar());
-      case adminhome:
-        return MaterialPageRoute(builder: (_) => AdminHome());
+      case addproduct:
+        return MaterialPageRoute(builder: (_)=> AddProduct());
       // case personalchat:
       //   return MaterialPageRoute(builder: (_) => PersonalChatScreen());
       default:

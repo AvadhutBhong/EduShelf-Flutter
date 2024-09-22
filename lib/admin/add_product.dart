@@ -1,7 +1,5 @@
 import 'dart:io';
-
 import 'package:edu_shelf/services/database.dart';
-import 'package:edu_shelf/widgets/support_widget.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icon_snackbar/flutter_icon_snackbar.dart';
@@ -20,52 +18,60 @@ class _AddProductState extends State<AddProduct> {
   final ImagePicker _picker = ImagePicker();
   File? selectedImage;
 
-  Future getImage() async {
+  TextEditingController nameController = TextEditingController();
+  TextEditingController descriptionController = TextEditingController();
+  TextEditingController priceController = TextEditingController();
+  TextEditingController quantityController = TextEditingController();
+  TextEditingController sellerContactController = TextEditingController();
+
+  final _formKey = GlobalKey<FormState>();
+
+  String? categoryValue;
+  String? conditionValue;
+
+  final List<String> categoryItems = ['TextBook', 'Calculator', 'Graphics Tools'];
+  final List<String> conditionItems = ['New', 'Used'];
+
+  Future<void> getImage() async {
     var image = await _picker.pickImage(source: ImageSource.gallery);
     selectedImage = File(image!.path);
     setState(() {});
   }
 
-  TextEditingController nameController = TextEditingController();
-  TextEditingController descriptionController = TextEditingController();
-  TextEditingController priceController = TextEditingController();
-  TextEditingController phoneController = TextEditingController();
-
-  final _formKey = GlobalKey<FormState>();
-
-  uploadImage() async {
-    if (_formKey.currentState!.validate() &&
-        selectedImage != null &&
-        value != null) {
+  Future<void> uploadImage() async {
+    if (_formKey.currentState!.validate() && selectedImage != null && categoryValue != null && conditionValue != null) {
       setState(() {
         isAdded = true; // Start the animation
       });
-      String addId = randomAlphaNumeric(10);
-      Reference firebaseStorageRef =
-      FirebaseStorage.instance.ref().child("blogImage").child(addId);
 
+      String addId = randomAlphaNumeric(10);
+      Reference firebaseStorageRef = FirebaseStorage.instance.ref().child("productImages").child(addId);
       final UploadTask task = firebaseStorageRef.putFile(selectedImage!);
       var downloadUrl = await (await task).ref.getDownloadURL();
 
       Map<String, dynamic> addProductMap = {
-        "Name": nameController.text,
+        "name": nameController.text,
         "description": descriptionController.text,
-        "Image": downloadUrl,
+        "image": downloadUrl,
         "price": priceController.text,
-        "category": value,
+        "category": categoryValue,
+        "condition": conditionValue,
+        "quantity": quantityController.text,
+        "sellerContact": sellerContactController.text,
       };
 
-      await DatabaseMethods()
-          .addProduct(addProductMap, value!)
-          .then((value) => {
-        selectedImage = null,
-        nameController.text = "",
-        descriptionController.text = "",
-        priceController.text = "",
-        this.value = null,
-        IconSnackBar.show(context,
-            label: 'Product added successfully ',
-            snackBarType: SnackBarType.success),
+      await DatabaseMethods().addProduct(addProductMap, categoryValue!).then((value) {
+        selectedImage = null;
+        nameController.clear();
+        descriptionController.clear();
+        priceController.clear();
+        quantityController.clear();
+        sellerContactController.clear();
+        setState(() {
+          categoryValue = null;
+          conditionValue = null;
+        });
+        IconSnackBar.show(context, label: 'Product added successfully', snackBarType: SnackBarType.success);
       });
 
       Future.delayed(Duration(seconds: 2), () {
@@ -74,271 +80,186 @@ class _AddProductState extends State<AddProduct> {
         });
       });
     } else {
-      // Show error message if the image or category is not selected
       IconSnackBar.show(context,
           label: 'Please fill in all fields',
           snackBarType: SnackBarType.fail);
     }
   }
 
-  String? value;
-  final List<String> categoryItems = ['TextBook', 'Calculator', 'Graphics Tools'];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFF5F5F7),
       appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
         leading: GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-            },
-            child: Icon(Icons.arrow_back)),
-        centerTitle: true,
-        title: Text(
-          "Add",
-          style: AppWidget.semiboldTextFieldStyle().copyWith(fontSize: 20),
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: Icon(Icons.arrow_back, color: Colors.black),
         ),
+        title: Text("Add Product", style: TextStyle(color: Colors.black)),
+        centerTitle: true,
       ),
-      body: Container(
-        margin: EdgeInsets.symmetric(vertical: 30, horizontal: 30),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Upload the Product Image",
-                  style: AppWidget.lightTextFieldStyle(),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(20),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Image Picker with Modern UI
+              GestureDetector(
+                onTap: () {
+                  getImage();
+                },
+                child: Container(
+                  height: 180,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Color(0xFFE0E0E0),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.black12),
+                  ),
+                  child: selectedImage == null
+                      ? Center(child: Icon(Icons.camera_alt, size: 50, color: Colors.grey[700]))
+                      : ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Image.file(selectedImage!, fit: BoxFit.cover),
+                  ),
                 ),
-                SizedBox(height: 20.0),
-                selectedImage == null
-                    ? GestureDetector(
-                  onTap: () {
-                    getImage();
-                  },
-                  child: Center(
-                    child: Container(
-                      height: 150,
-                      width: 150,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.black,
-                          width: 1,
+              ),
+              SizedBox(height: 20),
+
+              // Product Name
+              buildTextField("Product Name", nameController, "Enter product name"),
+
+              // Product Description
+              buildTextField("Description", descriptionController, "Enter product description", maxLines: 4),
+
+              // Price Field
+              buildTextField("Price (INR)", priceController, "Enter price", keyboardType: TextInputType.number),
+
+              // Quantity Field
+              buildTextField("Quantity", quantityController, "Enter quantity", keyboardType: TextInputType.number),
+
+              // Category Dropdown
+              buildDropdown("Category", categoryItems, categoryValue, (String? newValue) {
+                setState(() {
+                  categoryValue = newValue;
+                });
+              }),
+
+              // Condition Dropdown (New/Used)
+              buildDropdown("Condition", conditionItems, conditionValue, (String? newValue) {
+                setState(() {
+                  conditionValue = newValue;
+                });
+              }),
+
+              // Seller Contact
+              buildTextField("Seller Contact", sellerContactController, "Enter your contact number", keyboardType: TextInputType.phone),
+
+              SizedBox(height: 40),
+
+              // Submit Button
+              Center(
+                child: GestureDetector(
+                  onTap: uploadImage,
+                  child: AnimatedContainer(
+                    duration: Duration(milliseconds: 300),
+                    height: 50,
+                    width: isAdded ? 150 : 200,
+                    decoration: BoxDecoration(
+                      color: isAdded ? Colors.green : Colors.black,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 6,
+                          offset: Offset(0, 4),
                         ),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Center(
-                        child: Icon(Icons.camera_alt),
-                      ),
+                      ],
                     ),
-                  ),
-                )
-                    : Center(
-                  child: Material(
-                    elevation: 4.0,
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                      height: 150,
-                      width: 150,
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.black,
-                          width: 1,
-                        ),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Center(
-                        child: ClipRRect(
-                            borderRadius: BorderRadius.circular(20),
-                            child: Image.file(
-                              selectedImage!,
-                              fit: BoxFit.cover,
-                            )),
+                    child: Center(
+                      child: isAdded
+                          ? Icon(Icons.check, color: Colors.white)
+                          : Text(
+                        'Add Product',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
                       ),
                     ),
                   ),
                 ),
-                SizedBox(height: 20),
-                Text(
-                  "Product name",
-                  style: AppWidget.lightTextFieldStyle(),
-                ),
-                SizedBox(height: 15),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
-                    color: Color(0xffececf8),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: TextFormField(
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Please enter product name";
-                      }
-                      return null;
-                    },
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 20),
-                Text(
-                  "Product description",
-                  style: AppWidget.lightTextFieldStyle(),
-                ),
-                SizedBox(height: 15),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
-                    color: Color(0xffececf8),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: TextFormField(
-                    maxLines: 5,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Please enter product description";
-                      }
-                      return null;
-                    },
-                    controller: descriptionController,
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 20),
-                Text(
-                  "Product Category",
-                  style: AppWidget.lightTextFieldStyle(),
-                ),
-                SizedBox(height: 20),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
-                    color: Color(0xffececf8),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      items: categoryItems
-                          .map((item) => DropdownMenuItem(
-                          value: item,
-                          child: Text(
-                            item,
-                            style: AppWidget.semiboldTextFieldStyle()
-                                .copyWith(fontWeight: FontWeight.w600),
-                          )))
-                          .toList(),
-                      onChanged: (String? value) {
-                        setState(() {
-                          this.value = value;
-                        });
-                      },
-                      dropdownColor: Colors.white,
-                      hint: Text("Select Category"),
-                      iconSize: 25,
-                      value: value,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 20),
-                Text(
-                  "Product price (in INR)",
-                  style: AppWidget.lightTextFieldStyle(),
-                ),
-                SizedBox(height: 15),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
-                    color: Color(0xffececf8),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: TextFormField(
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Please enter product price";
-                      }
-                      return null;
-                    },
-                    controller: priceController,
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 20),
-                SizedBox(height: 50),
-                Center(
-                  child: GestureDetector(
-                    onTap: () {
-                      // Only start the upload if all fields are valid
-                      if (_formKey.currentState!.validate() &&
-                          selectedImage != null &&
-                          value != null) {
-                        uploadImage();
-                      } else {
-                        IconSnackBar.show(context,
-                            label: 'Please fill in all fields',
-                            snackBarType: SnackBarType.fail);
-                      }
-                    },
-                    child: Container(
-                      width: 200, // Fixed width
-                      height: 50, // Fixed height
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                            color: isAdded ? Colors.green : Colors.black),
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: Stack(
-                        children: [
-                          // Animated Green Background
-                          AnimatedPositioned(
-                            duration: Duration(milliseconds: 300),
-                            left: isAdded ? 0 : -200, // Slide from left to right
-                            child: Container(
-                              width: 200,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                color: Colors.green,
-                              ),
-                            ),
-                          ),
-                          // Button Content
-                          Center(
-                            child: AnimatedSwitcher(
-                              duration: Duration(milliseconds: 300),
-                              child: isAdded
-                                  ? Icon(
-                                Icons.check,
-                                color: Colors.white,
-                              )
-                                  : Text(
-                                'Add Product',
-                                style: AppWidget.semiboldTextFieldStyle()
-                                    .copyWith(fontSize: 16),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
+    );
+  }
+
+  // Reusable method for input fields
+  Widget buildTextField(String label, TextEditingController controller, String hint, {TextInputType? keyboardType, int maxLines = 1}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+        SizedBox(height: 10),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          maxLines: maxLines,
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter $label';
+            }
+            return null;
+          },
+          decoration: InputDecoration(
+            hintText: hint,
+            filled: true,
+            fillColor: Color(0xFFECECEC),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+        SizedBox(height: 20),
+      ],
+    );
+  }
+
+  // Reusable method for dropdown fields
+  Widget buildDropdown(String label, List<String> items, String? selectedValue, ValueChanged<String?> onChanged) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+        SizedBox(height: 10),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 15),
+          decoration: BoxDecoration(
+            color: Color(0xFFECECEC),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: selectedValue,
+              isExpanded: true,
+              hint: Text("Select $label"),
+              items: items.map((item) => DropdownMenuItem<String>(
+                value: item,
+                child: Text(item, style: TextStyle(fontSize: 16)),
+              )).toList(),
+              onChanged: onChanged,
+            ),
+          ),
+        ),
+        SizedBox(height: 20),
+      ],
     );
   }
 }
