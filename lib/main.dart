@@ -78,6 +78,9 @@ class MyApp extends StatelessWidget {
             foregroundColor: AppColors.darkGray,
           ),
         ),
+        appBarTheme: AppBarTheme(
+          centerTitle: true,
+        )
       ),
       onGenerateRoute: AppRoutes.generateRoute,
       home: SignUpScreen(),
