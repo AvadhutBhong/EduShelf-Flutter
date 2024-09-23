@@ -105,6 +105,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         title: const Text('Edit Profile', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.black,
         centerTitle: true,
+        leading: IconButton(onPressed: ()=>Navigator.pop(context), icon: Icon(Icons.arrow_back_rounded, color: Colors.white,)),
       ),
       body: isUpdating
           ? const Center(child: CircularProgressIndicator())

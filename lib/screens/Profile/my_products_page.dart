@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edu_shelf/services/database.dart';
 import 'package:flutter/material.dart';
 
+import '../../admin/add_product.dart';
 import '../../services/shared_pref.dart';
 
 class MyProductsPage extends StatefulWidget {
@@ -15,7 +16,6 @@ class _MyProductsPageState extends State<MyProductsPage> {
   @override
   void initState() {
     super.initState();
-    // Fetch userId from shared preferences or other storage
     getUserId();
   }
 
@@ -24,7 +24,6 @@ class _MyProductsPageState extends State<MyProductsPage> {
     setState(() {});
   }
 
-  // Fetch user's products from Firestore
   Stream<QuerySnapshot> getUserProductsStream() {
     return FirebaseFirestore.instance
         .collection('users')
@@ -33,25 +32,34 @@ class _MyProductsPageState extends State<MyProductsPage> {
         .snapshots();
   }
 
-  // Delete product from Firestore
   Future<void> deleteProduct(String productId, String category) async {
     await DatabaseMethods().deleteProduct(productId, category, userId!);
   }
 
-  // Update product (Navigate to AddProductPage with current product details)
   Future<void> updateProduct(Map<String, dynamic> productData) async {
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => AddProductPage(
-    //       product: productData, // Pass existing product details to edit
-    //       isEditMode: true,
-    //     ),
-    //   ),
-    // );
+    Map<String, dynamic> sanitizedProductData = {
+      'name': productData['name'] ?? 'Untitled Product',
+      'price': productData['price']?.toString() ?? '0',  // Convert price to string if it's a number
+      'image': productData['image'],          // Default to empty string if imageURL is null
+      'category': productData['category'] ?? 'Uncategorized',
+      'ownerid': productData['ownerid'] ?? '',
+      'productID' : productData['productID'],
+    };
+
+    print(sanitizedProductData);
+    print('WE HAVE');
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddProduct(
+          product: sanitizedProductData,  // Pass the sanitized product data
+          isEditMode: true,
+        ),
+      ),
+    );
   }
 
-  // Confirmation Dialog for delete
+
   Future<void> showDeleteConfirmationDialog(String productId, String category) async {
     return showDialog<void>(
       context: context,
@@ -103,34 +111,87 @@ class _MyProductsPageState extends State<MyProductsPage> {
             );
           }
 
-          // Display the products in a list
           return ListView.builder(
             itemCount: snapshot.data!.docs.length,
             itemBuilder: (context, index) {
               var product = snapshot.data!.docs[index];
-              return ListTile(
-                leading: Image.network(product['imageURL'], width: 50, height: 50),
-                title: Text(product['title']),
-                subtitle: Text("Price: ₹${product['price']}"),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.edit, color: Colors.blue),
-                      onPressed: () {
-                        updateProduct(product.data() as Map<String, dynamic>);
-                      },
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Card(
+                  elevation: 3,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.network(
+                            product['image'] ?? 'default_image_url', // Fallback for image
+                            width: 80,
+                            height: 80,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                product['name'] ?? 'Unknown Product',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                "Price: ₹${product['price']?.toString() ?? '0'}", // Handle null price
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                "Category: ${product['category'] ?? 'Uncategorized'}", // Default category
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[500],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        Column(
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.edit, color: Colors.blue),
+                              onPressed: () {
+                                updateProduct(product.data() as Map<String, dynamic>);
+                              },
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                showDeleteConfirmationDialog(
+                                    product.id, product['category']);
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    IconButton(
-                      icon: Icon(Icons.delete, color: Colors.red),
-                      onPressed: () {
-                        showDeleteConfirmationDialog(
-                            product.id, product['category']);
-                      },
-                    ),
-                  ],
+                  ),
                 ),
               );
+
             },
           );
         },

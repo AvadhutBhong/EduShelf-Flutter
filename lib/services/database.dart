@@ -30,9 +30,9 @@ class DatabaseMethods {
     // Extract necessary fields for global and myProducts collections
     Map<String, dynamic> minimalProductData = {
       'productID': categoryDocRef.id,
-      'title': productData['name'],
+      'name': productData['name'],
       'price': productData['price'],
-      'imageURL': productData['image'],
+      'image': productData['image'],
       'category': productData['category'],
       'ownerid': productData['ownerid'],
     };
@@ -87,5 +87,46 @@ class DatabaseMethods {
     // Commit batch deletion
     await batch.commit();
   }
+
+  Future<void> updateProduct(String productId, String category, String userId, Map<String, dynamic> updatedProductData) async {
+    WriteBatch batch = FirebaseFirestore.instance.batch();
+
+    // 1. Update the product in Category Collection
+    DocumentReference categoryDocRef = FirebaseFirestore.instance
+        .collection('Categories')
+        .doc(category)
+        .collection('products')
+        .doc(productId);
+    batch.update(categoryDocRef, updatedProductData);
+
+    // 2. Update the product in Global Collection
+    Map<String, dynamic> minimalProductData = {
+      'name': updatedProductData['name'],
+      'price': updatedProductData['price'],
+      'image': updatedProductData['image'],
+      'category': updatedProductData['category'],
+    };
+
+    DocumentReference globalDocRef = FirebaseFirestore.instance
+        .collection('globalProducts')
+        .doc(productId);
+    batch.update(globalDocRef, minimalProductData);
+
+    // 3. Update the product in MyProducts Collection for the user
+    DocumentReference myProductsDocRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('myProducts')
+        .doc(productId);
+    batch.update(myProductsDocRef, minimalProductData);
+
+    // Commit batch update
+    await batch.commit().then((_) {
+      print("Product updated successfully.");
+    }).catchError((e) {
+      print("Error updating product: $e");
+    });
+  }
+
 }
 

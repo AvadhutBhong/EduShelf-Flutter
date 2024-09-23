@@ -1,6 +1,7 @@
 import 'package:edu_shelf/services/shared_pref.dart';
 import 'package:flutter/material.dart';
 import 'Profile/edit_profile_screen.dart';
+import 'Profile/my_products_page.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -149,7 +150,7 @@ class _ProfileState extends State<Profile> {
                 ),
               ),
               onTap: () {
-                // Navigate to My Products screen
+                Navigator.push(context, MaterialPageRoute(builder: (_)=> MyProductsPage()));
               },
             ),
             // Help & Support Section

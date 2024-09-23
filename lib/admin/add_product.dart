@@ -8,7 +8,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:random_string/random_string.dart';
 
 class AddProduct extends StatefulWidget {
-  const AddProduct({super.key});
+  final Map<String , dynamic>? product;
+  final bool isEditMode;
+  AddProduct({super.key, this.product, this.isEditMode = false});
 
   @override
   State<AddProduct> createState() => _AddProductState();
@@ -30,6 +32,28 @@ class _AddProductState extends State<AddProduct> {
 
   String? categoryValue;
   String? conditionValue;
+
+  @override
+  void initState() {
+
+    super.initState();
+    if (widget.isEditMode && widget.product != null) {
+      nameController.text = widget.product!['name'];
+      descriptionController.text = widget.product!['description'] ?? 'No description provided';
+      priceController.text = widget.product!['price'].toString();
+      quantityController.text = widget.product!['quantity'].toString() ?? '0';
+      sellerContactController.text = widget.product!['sellerContact'] ?? '0';
+      categoryValue = widget.product!['category'];
+      conditionValue = widget.product!['condition'] ?? '';
+
+      // Set the image URL for display
+      String imageUrl = widget.product!['image'] ?? '';
+      if (imageUrl.isNotEmpty) {
+        selectedImage = null; // Resetting selectedImage because it's a URL
+        // Optionally handle image display if needed
+      }
+    }
+  }
 
   final List<String> categoryItems = ['TextBook', 'Calculator', 'Graphics Tools'];
   final List<String> conditionItems = ['New', 'Used'];
@@ -53,7 +77,7 @@ class _AddProductState extends State<AddProduct> {
   // Handle Phone Update
   Future<void> handlePhoneUpdate(String enteredPhone, String userid) async {
     String? savedPhone = await SharedPreferenceHelper().getUserPhone(userid);
-    print('Received saved number: $savedPhone');
+    print('Received savednumber: $savedPhone');
 
     if (savedPhone == null || savedPhone.isEmpty || savedPhone != enteredPhone) {
       print('Phone number is new or changed, adding/updating.');
@@ -87,14 +111,19 @@ class _AddProductState extends State<AddProduct> {
       setState(() {
         isAdded = true; // Start the animation
       });
-
-      String addId = randomAlphaNumeric(10);
-      String downloadUrl = await uploadImageToStorage(addId);
-
-      // Fetch the userid and check the phone update
+      print('got 11');
+      String addId = widget.isEditMode ? widget.product!['productID'] : randomAlphaNumeric(10);
+      String downloadUrl;
+      print('gottttt00');
+      if (widget.isEditMode && selectedImage == null) {
+        downloadUrl = widget.product!['image'];
+      } else {
+        downloadUrl = await uploadImageToStorage(addId);
+      }
+      print('got 22');
       String? userid = await SharedPreferenceHelper().getUserId();
       await handlePhoneUpdate(sellerContactController.text.toString(), userid!);
-
+      print('got33');
       Map<String, dynamic> addProductMap = {
         "name": nameController.text,
         "description": descriptionController.text,
@@ -107,21 +136,31 @@ class _AddProductState extends State<AddProduct> {
         "ownerid": userid,
       };
 
-
-
-      // Add product to Firestore
-      await addProductToFirestore(addProductMap, categoryValue!, userid!);
-
-      Future.delayed(const Duration(seconds: 2), () {
-        setState(() {
-          isAdded = false; // Reset the button state
+      try {
+        if (widget.isEditMode) {
+          await DatabaseMethods().updateProduct(addId, categoryValue!, userid!, addProductMap);
+          showSuccessSnackbar(); // Show snackbar on update success
+        } else {
+          await addProductToFirestore(addProductMap, categoryValue!, userid!);
+        }
+      } catch (e) {
+        print("Error updating product: $e");
+        IconSnackBar.show(context,
+            label: 'Failed to update product', snackBarType: SnackBarType.fail);
+      } finally {
+        Future.delayed(const Duration(seconds: 2), () {
+          setState(() {
+            isAdded = false; // Reset the button state
+          });
         });
-      });
+      }
     } else {
       IconSnackBar.show(context,
           label: 'Please fill in all fields', snackBarType: SnackBarType.fail);
     }
   }
+
+
 
   // Reset Form after product is added
   void resetForm() {
@@ -257,7 +296,7 @@ class _AddProductState extends State<AddProduct> {
                       child: isAdded
                           ? Icon(Icons.check, color: Colors.white)
                           : Text(
-                        'Add Product',
+                        widget.isEditMode ? 'Update Product' : 'Add Product',
                         style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -267,6 +306,7 @@ class _AddProductState extends State<AddProduct> {
                   ),
                 ),
               ),
+
             ],
           ),
         ),
@@ -309,6 +349,7 @@ class _AddProductState extends State<AddProduct> {
   }
 
   // Reusable method for dropdown fields
+  // Reusable method for dropdown fields
   Widget buildDropdown(String label, List<String> items, String? selectedValue, ValueChanged<String?> onChanged) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -323,7 +364,7 @@ class _AddProductState extends State<AddProduct> {
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
-              value: selectedValue,
+              value: items.contains(selectedValue) ? selectedValue : null, // Ensure it matches one of the items
               isExpanded: true,
               hint: Text("Select $label"),
               items: items.map((item) => DropdownMenuItem<String>(
@@ -338,4 +379,5 @@ class _AddProductState extends State<AddProduct> {
       ],
     );
   }
+
 }
