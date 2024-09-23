@@ -15,26 +15,10 @@ class AddProduct extends StatefulWidget {
 }
 
 class _AddProductState extends State<AddProduct> {
-  String? userid;
-  bool isAdded = false;
+  // Variables
   final ImagePicker _picker = ImagePicker();
   File? selectedImage;
-
-  getSharedpref() async {
-    userid = await SharedPreferenceHelper().getUserId();
-    setState(() {});
-  }
-
-  onTheLoad() async {
-    await getSharedpref();
-    setState(() {});
-  }
-
-  @override
-  void initState() {
-    onTheLoad();
-    super.initState();
-  }
+  bool isAdded = false;
 
   TextEditingController nameController = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
@@ -50,13 +34,52 @@ class _AddProductState extends State<AddProduct> {
   final List<String> categoryItems = ['TextBook', 'Calculator', 'Graphics Tools'];
   final List<String> conditionItems = ['New', 'Used'];
 
+  // Image Picker Function
   Future<void> getImage() async {
     var image = await _picker.pickImage(source: ImageSource.gallery);
-    selectedImage = File(image!.path);
-    setState(() {});
+    setState(() {
+      selectedImage = File(image!.path);
+    });
   }
 
-  Future<void> uploadImage() async {
+  // Upload Image to Firebase Storage
+  Future<String> uploadImageToStorage(String addId) async {
+    Reference firebaseStorageRef =
+    FirebaseStorage.instance.ref().child("productImages").child(addId);
+    final UploadTask task = firebaseStorageRef.putFile(selectedImage!);
+    return await (await task).ref.getDownloadURL();
+  }
+
+  // Handle Phone Update
+  Future<void> handlePhoneUpdate(String enteredPhone, String userid) async {
+    String? savedPhone = await SharedPreferenceHelper().getUserPhone(userid);
+    print('Received saved number: $savedPhone');
+
+    if (savedPhone == null || savedPhone.isEmpty || savedPhone != enteredPhone) {
+      print('Phone number is new or changed, adding/updating.');
+
+      // Update Firestore with the new phone number
+      await DatabaseMethods().addUserDetails({
+        "phone": enteredPhone,
+      }, userid);
+
+      // Save the new phone number to shared preferences
+      await SharedPreferenceHelper().saveUserPhone(userid, enteredPhone);
+    } else {
+      print("Phone number already exists and is the same.");
+    }
+  }
+
+  // Add Product to Firestore
+  Future<void> addProductToFirestore(Map<String, dynamic> productData, String category, String userId) async {
+    await DatabaseMethods().addProduct(productData, category, userId).then((value) {
+      resetForm();
+      showSuccessSnackbar();
+    });
+  }
+
+  // Upload Product
+  Future<void> uploadProduct() async {
     if (_formKey.currentState!.validate() &&
         selectedImage != null &&
         categoryValue != null &&
@@ -66,10 +89,11 @@ class _AddProductState extends State<AddProduct> {
       });
 
       String addId = randomAlphaNumeric(10);
-      Reference firebaseStorageRef =
-      FirebaseStorage.instance.ref().child("productImages").child(addId);
-      final UploadTask task = firebaseStorageRef.putFile(selectedImage!);
-      var downloadUrl = await (await task).ref.getDownloadURL();
+      String downloadUrl = await uploadImageToStorage(addId);
+
+      // Fetch the userid and check the phone update
+      String? userid = await SharedPreferenceHelper().getUserId();
+      await handlePhoneUpdate(sellerContactController.text.toString(), userid!);
 
       Map<String, dynamic> addProductMap = {
         "name": nameController.text,
@@ -80,54 +104,15 @@ class _AddProductState extends State<AddProduct> {
         "condition": conditionValue,
         "quantity": quantityController.text,
         "sellerContact": sellerContactController.text,
+        "ownerid": userid,
       };
 
-      // Check if phone exists in shared preferences
-      // Check if phone exists in shared preferences
-      String? savedPhone = await SharedPreferenceHelper().getUserPhone(userid!); // Pass userId when retrieving phone number
-      print('Received saved number: $savedPhone');
-
-// Compare the saved number with the newly entered number
-      String enteredPhone = sellerContactController.text.toString();
-
-      if (savedPhone == null || savedPhone.isEmpty || savedPhone != enteredPhone) {
-        // If the phone number is different from the saved one, update Firestore and Shared Preferences
-        print('Phone number is new or changed, adding/updating.');
-
-        // Update Firestore with the new phone number
-        await DatabaseMethods().addUserDetails({
-          "phone": enteredPhone,
-        }, userid!);
-
-        // Save the new phone number to shared preferences using userId
-        await SharedPreferenceHelper().saveUserPhone(userid!, enteredPhone);
-      } else {
-        print("Phone number already exists and is the same.");
-      }
 
 
       // Add product to Firestore
-      await DatabaseMethods()
-          .addProduct(addProductMap, categoryValue!)
-          .then((value) {
-        selectedImage = null;
-        nameController.clear();
-        descriptionController.clear();
-        priceController.clear();
-        quantityController.clear();
-        sellerContactController.clear();
+      await addProductToFirestore(addProductMap, categoryValue!, userid!);
 
-        setState(() {
-          categoryValue = null;
-          conditionValue = null;
-        });
-
-        IconSnackBar.show(context,
-            label: 'Product added successfully',
-            snackBarType: SnackBarType.success);
-      });
-
-      Future.delayed(Duration(seconds: 2), () {
+      Future.delayed(const Duration(seconds: 2), () {
         setState(() {
           isAdded = false; // Reset the button state
         });
@@ -136,6 +121,27 @@ class _AddProductState extends State<AddProduct> {
       IconSnackBar.show(context,
           label: 'Please fill in all fields', snackBarType: SnackBarType.fail);
     }
+  }
+
+  // Reset Form after product is added
+  void resetForm() {
+    selectedImage = null;
+    nameController.clear();
+    descriptionController.clear();
+    priceController.clear();
+    quantityController.clear();
+    sellerContactController.clear();
+
+    setState(() {
+      categoryValue = null;
+      conditionValue = null;
+    });
+  }
+
+  // Show Success Snackbar
+  void showSuccessSnackbar() {
+    IconSnackBar.show(context,
+        label: 'Product added successfully', snackBarType: SnackBarType.success);
   }
 
   @override
@@ -231,7 +237,7 @@ class _AddProductState extends State<AddProduct> {
               // Submit Button
               Center(
                 child: GestureDetector(
-                  onTap: uploadImage,
+                  onTap: uploadProduct,
                   child: AnimatedContainer(
                     duration: Duration(milliseconds: 300),
                     height: 50,

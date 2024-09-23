@@ -81,7 +81,7 @@ class MyApp extends StatelessWidget {
         )
       ),
       onGenerateRoute: AppRoutes.generateRoute,
-      home: SignUpScreen(),
+      home: BottomNavbar(),
     );
   }
 }
