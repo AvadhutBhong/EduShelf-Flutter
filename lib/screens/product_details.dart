@@ -76,6 +76,10 @@ class _ProductDetailsState extends State<ProductDetails> {
 
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(
+          title: Text('PRODUCT DETAILS',style: AppWidget.semiboldTextFieldStyle(),),
+
+        ),
         backgroundColor: Color(0xFFF3F4F6),
         body: FutureBuilder<Map<String, dynamic>?>( // Update to use productFuture
           future: productFuture,
@@ -95,44 +99,9 @@ class _ProductDetailsState extends State<ProductDetails> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Back Button and Label
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
-                      child: Row(
-                        children: [
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.pop(context);
-                            },
-                            child: Container(
-                              padding: EdgeInsets.all(5),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.black.withOpacity(0.8),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black26,
-                                    blurRadius: 5,
-                                    offset: Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Icon(Icons.arrow_back, color: Colors.white),
-                            ),
-                          ),
-                          SizedBox(width: 20),
-                          Text(
-                            'Product Details',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+
                     SizedBox(height: 10),
-                    // Image and other details
+// Image and other details
                     ClipRRect(
                       borderRadius: BorderRadius.only(
                         bottomLeft: Radius.circular(30),
@@ -148,39 +117,35 @@ class _ProductDetailsState extends State<ProductDetails> {
                               decoration: BoxDecoration(
                                 image: DecorationImage(
                                   image: NetworkImage(product['image'] ?? ''),
-                                  fit: BoxFit.contain,
+                                  fit: BoxFit.contain, // Changed to cover for better image display
                                 ),
                                 gradient: LinearGradient(
                                   begin: Alignment.topCenter,
                                   end: Alignment.bottomCenter,
                                   colors: [
-                                    Colors.black.withOpacity(0.2),
-                                    Colors.black.withOpacity(0.6),
+                                    Colors.black.withOpacity(0.4), // Adjusted opacity for better contrast
+                                    Colors.black.withOpacity(0.8),
                                   ],
                                 ),
                               ),
                             ),
+                            // Optional: You can add a title overlay on the image if needed
                             Positioned(
-                              right: 20,
-                              top: 20,
-                              child: GestureDetector(
-                                onTap: () {
-                                  // Add to Wishlist or Favorite Functionality
-                                },
-                                child: Container(
-                                  padding: EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: Colors.white.withOpacity(0.8),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black26,
-                                        blurRadius: 5,
-                                        offset: Offset(0, 2),
-                                      ),
-                                    ],
+                              left: 20,
+                              bottom: 20,
+                              child: Container(
+                                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.7),
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                child: Text(
+                                  product['name'] ?? 'Product Name',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  child: Icon(Icons.favorite_border, color: Colors.red),
                                 ),
                               ),
                             ),
@@ -189,6 +154,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                       ),
                     ),
                     SizedBox(height: 20),
+
                     // Product Details Section
                     Container(
                       padding: EdgeInsets.symmetric(vertical: 30, horizontal: 20),
@@ -229,7 +195,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                               Text(
                                 '₹${product['price'] ?? '0'}',
                                 style: TextStyle(
-                                  color: Color(0xFF002244),
+                                  color: Colors.orange,
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -254,7 +220,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                           _buildInfoText('Stock Status: ${product['stockStatus'] ?? 'Available'}'),
                           SizedBox(height: 20), // Space before Owner Details
                           // Owner Details
-                          Text('Seller Contact Details:', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                          Text('Seller Contact Details:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                           FutureBuilder<Map<String, dynamic>?>(
                             future: fetchOwnerDetails(ownerId),
                             builder: (context, ownerSnapshot) {
@@ -322,10 +288,10 @@ class _ProductDetailsState extends State<ProductDetails> {
   }
   Widget _buildInfoText(String text) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4), // Consistent vertical spacing
+      padding: const EdgeInsets.symmetric(vertical: 2), // Consistent vertical spacing
       child: Text(
         text,
-        style: TextStyle(fontSize: 16, color: Colors.grey),
+        style: TextStyle(fontSize: 16, color: Colors.black87),
       ),
     );
   }
