@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edu_shelf/services/database.dart';
 import 'package:edu_shelf/services/shared_pref.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -134,6 +135,7 @@ class _AddProductState extends State<AddProduct> {
         "quantity": quantityController.text,
         "sellerContact": sellerContactController.text,
         "ownerid": userid,
+        "timestamp": FieldValue.serverTimestamp(),
       };
 
       try {

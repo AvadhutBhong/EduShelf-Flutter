@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edu_shelf/screens/product_details.dart';
 import 'package:edu_shelf/services/database.dart';
-import 'package:edu_shelf/widgets/home_product_card.dart';
+// import 'package:edu_shelf/widgets/home_product_card.dart';
 import 'package:flutter/material.dart';
 
 import '../widgets/support_widget.dart';
@@ -18,7 +18,7 @@ class _CategoryProductsState extends State<CategoryProducts> {
   Stream? categoryStream;
 
   getontheload() async {
-    categoryStream = await DatabaseMethods().getProducts(widget.category);
+    // categoryStream = await DatabaseMethods().getProducts(widget.category);
     setState(() {
 
     });

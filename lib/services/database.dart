@@ -35,6 +35,7 @@ class DatabaseMethods {
       'image': productData['image'],
       'category': productData['category'],
       'ownerid': productData['ownerid'],
+      'timestamp': productData['timestamp'],
     };
 
     // 2. Add minimal details to GlobalCollectionAllProducts
@@ -55,8 +56,11 @@ class DatabaseMethods {
     await batch.commit();
   }
 
-  Future<Stream<QuerySnapshot>> getProducts(String category) async {
-    return await FirebaseFirestore.instance.collection(category).snapshots();
+  Future<Stream<QuerySnapshot>> getAllProducts() async {
+    return FirebaseFirestore.instance
+        .collection('globalProducts')
+        .orderBy('timestamp', descending: true) // Sort by timestamp
+        .snapshots();
   }
 
   Future<void> deleteProduct(String productId, String category, String userId) async {
@@ -105,6 +109,7 @@ class DatabaseMethods {
       'price': updatedProductData['price'],
       'image': updatedProductData['image'],
       'category': updatedProductData['category'],
+      'timestamp': FieldValue.serverTimestamp(),
     };
 
     DocumentReference globalDocRef = FirebaseFirestore.instance

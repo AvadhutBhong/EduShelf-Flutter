@@ -46,8 +46,6 @@ class _MyProductsPageState extends State<MyProductsPage> {
       'productID' : productData['productID'],
     };
 
-    print(sanitizedProductData);
-    print('WE HAVE');
     Navigator.push(
       context,
       MaterialPageRoute(
