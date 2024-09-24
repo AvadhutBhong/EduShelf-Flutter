@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edu_shelf/colors.dart';
-import 'package:edu_shelf/screens/phone_login_screen.dart';
+import 'package:edu_shelf/screens/Login_Files/phone_login_screen.dart';
 import 'package:edu_shelf/services/database.dart';
 import 'package:edu_shelf/services/shared_pref.dart';
 import 'package:edu_shelf/widgets/support_widget.dart';

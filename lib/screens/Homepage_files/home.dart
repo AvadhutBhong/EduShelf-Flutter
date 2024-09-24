@@ -1,11 +1,11 @@
-import 'package:edu_shelf/screens/category_products.dart';
+import 'package:edu_shelf/screens/Homepage_files/category_products.dart';
 import 'package:edu_shelf/services/shared_pref.dart';
 import 'package:edu_shelf/widgets/greeting_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../colors.dart';
-import '../services/database.dart';
-import '../widgets/support_widget.dart';
+import '../../colors.dart';
+import '../../services/database.dart';
+import '../../widgets/support_widget.dart';
 import 'home_product_card.dart';
 
 class HomePage extends StatefulWidget {
@@ -229,6 +229,7 @@ class AllProductsSection extends StatelessWidget {
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
               return Center(child: Text('No products available.'));
             }
+            print('Number of products fetched: ${snapshot.data!.docs.length}');
 
             // Limit the number of displayed products (e.g., first 5)
             final limitedProducts = snapshot.data!.docs.take(10).toList();
@@ -240,6 +241,7 @@ class AllProductsSection extends StatelessWidget {
                 children: limitedProducts.map((product) {
                   return HomeProductCard(
                     product: product.data() as Map<String, dynamic>,
+                    isFromHome: true,
                   );
                 }).toList(),
               ),

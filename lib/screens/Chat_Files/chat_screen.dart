@@ -1,7 +1,6 @@
-import 'package:edu_shelf/screens/personal_chat_screen.dart';
+import 'package:edu_shelf/screens/Chat_Files/personal_chat_screen.dart';
 import 'package:flutter/material.dart';
-
-import '../widgets/support_widget.dart';
+import '../../widgets/support_widget.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});

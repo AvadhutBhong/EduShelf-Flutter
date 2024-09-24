@@ -3,9 +3,9 @@ import 'package:edu_shelf/admin/admin_login.dart';
 import 'package:edu_shelf/screens/pre_sell_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:edu_shelf/colors.dart';
-import 'package:edu_shelf/screens/chat_screen.dart';
-import 'package:edu_shelf/screens/home.dart';
-import 'package:edu_shelf/screens/profile.dart';
+import 'package:edu_shelf/screens/Chat_Files/chat_screen.dart';
+import 'package:edu_shelf/screens/Homepage_files/home.dart';
+import 'package:edu_shelf/screens/Profile/profile.dart';
 
 class BottomNavbar extends StatefulWidget {
   const BottomNavbar({super.key});

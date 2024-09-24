@@ -1,11 +1,14 @@
-// product_card.dart
 import 'package:flutter/material.dart';
-import '../colors.dart';
+
+import '../../colors.dart';
+import '../product_details.dart';
 
 class HomeProductCard extends StatelessWidget {
   final Map<String, dynamic> product;
+  final String? productId;
+  final bool isFromHome;
 
-  const HomeProductCard({Key? key, required this.product}) : super(key: key);
+  const HomeProductCard({Key? key, required this.product, this.productId, this.isFromHome = false}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +16,7 @@ class HomeProductCard extends StatelessWidget {
       width: 170,
       margin: EdgeInsets.only(right: 10),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(5),
         color: Colors.white,
         boxShadow: [
           BoxShadow(
@@ -27,31 +30,31 @@ class HomeProductCard extends StatelessWidget {
         children: [
           // Product image taking maximum space
           ClipRRect(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(5)),
             child: Image.network(
-              product['image'], // Adjust according to your image field name
-              height: 170, // Adjust height for better visibility
+              product['image'],
+              height: 170,
               width: double.infinity,
-              fit: BoxFit.cover, // Ensure the image fills the space
+              fit: BoxFit.fitHeight,
             ),
           ),
           // Name and price text on the bottom left
           Positioned(
             left: 8,
-            bottom: 10, // Position for product name
+            bottom: 10,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  product['name'], // Adjust according to your product name field name
+                  product['name'],
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                    fontSize: 14, // Adjusted font size for better fitting
                     color: AppColors.darkGray,
-                    backgroundColor: Colors.white70, // Optional background for better visibility
+                    backgroundColor: Colors.white70,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2, // Allow up to 2 lines
+                  overflow: TextOverflow.ellipsis, // Continue to truncate with ellipsis if too long
                 ),
                 SizedBox(height: 4),
                 Text(
@@ -60,7 +63,7 @@ class HomeProductCard extends StatelessWidget {
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: AppColors.darkGray,
-                    backgroundColor: Colors.white70, // Optional background for better visibility
+                    backgroundColor: Colors.white70,
                   ),
                 ),
               ],
@@ -73,6 +76,17 @@ class HomeProductCard extends StatelessWidget {
             child: GestureDetector(
               onTap: () {
                 // Implement add to cart action
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ProductDetails(
+                      productId: product['productID'],
+                      product: product,
+                      category: product['category'],
+                      isFromHome: isFromHome,
+                    ),
+                  ),
+                );
               },
               child: Container(
                 decoration: BoxDecoration(

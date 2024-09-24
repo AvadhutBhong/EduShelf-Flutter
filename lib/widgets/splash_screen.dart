@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'package:edu_shelf/screens/home.dart';
+import 'package:edu_shelf/screens/Homepage_files/home.dart';
 import 'package:edu_shelf/widgets/botton_navbar.dart';
 import 'package:flutter/material.dart';
 import 'package:edu_shelf/colors.dart';
-import 'package:edu_shelf/screens/login_screen.dart';
+import 'package:edu_shelf/screens/Login_Files/login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

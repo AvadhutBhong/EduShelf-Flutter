@@ -1,10 +1,10 @@
 import 'package:edu_shelf/admin/add_product.dart';
 import 'package:edu_shelf/admin/admin_home.dart';
-import 'package:edu_shelf/screens/home.dart';
-import 'package:edu_shelf/screens/login_screen.dart';
-import 'package:edu_shelf/screens/personal_chat_screen.dart';
-import 'package:edu_shelf/screens/signin_screen.dart';
-import 'package:edu_shelf/screens/splash_screen.dart';
+import 'package:edu_shelf/screens/Homepage_files/home.dart';
+import 'package:edu_shelf/screens/Login_Files/login_screen.dart';
+import 'package:edu_shelf/screens/Chat_Files/personal_chat_screen.dart';
+import 'package:edu_shelf/screens/Login_Files/signin_screen.dart';
+import 'package:edu_shelf/widgets/splash_screen.dart';
 import 'package:edu_shelf/widgets/botton_navbar.dart';
 import 'package:flutter/material.dart';
 

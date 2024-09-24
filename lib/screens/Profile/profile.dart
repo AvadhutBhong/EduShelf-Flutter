@@ -1,7 +1,7 @@
 import 'package:edu_shelf/services/shared_pref.dart';
 import 'package:flutter/material.dart';
-import 'Profile/edit_profile_screen.dart';
-import 'Profile/my_products_page.dart';
+import 'edit_profile_screen.dart';
+import 'my_products_page.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
