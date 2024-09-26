@@ -1,12 +1,13 @@
 import 'package:edu_shelf/screens/Homepage_files/category_products.dart';
 import 'package:edu_shelf/services/shared_pref.dart';
+import 'package:edu_shelf/utils/search_helper.dart';
 import 'package:edu_shelf/widgets/greeting_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../colors.dart';
 import '../../services/database.dart';
-import '../../widgets/support_widget.dart';
 import 'home_product_card.dart';
+import 'search_bar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -17,27 +18,46 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String? name, image;
+  String searchQuery = ''; // Track the current search query
   final DatabaseMethods databaseMethods = DatabaseMethods();
-  late Stream<QuerySnapshot> productStream = Stream.empty(); // Initialize with an empty stream
-
-  Stream<QuerySnapshot> getAllProductsStream() {
-    return FirebaseFirestore.instance
-        .collection('globalProducts')
-        .orderBy('timestamp' , descending: true)
-        .snapshots();
-  }
+  late Stream<QuerySnapshot<Map<String, dynamic>>> productStream; // Updated to QuerySnapshot
+  TextEditingController searchController = TextEditingController(); // Add a controller for the search bar
 
   @override
   void initState() {
     super.initState();
     getTheSharedPref();
-    productStream = getAllProductsStream(); // Stream for products
+    productStream = getAllProductsStream(); // Default product stream
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose(); // Dispose of the controller when the widget is removed
+    super.dispose();
   }
 
   getTheSharedPref() async {
     name = await SharedPreferenceHelper().getUserName();
     image = await SharedPreferenceHelper().getUserImage();
     setState(() {});
+  }
+
+  void onSearchQueryChanged(String query) {
+    setState(() {
+      searchQuery = query;
+      productStream = query.isEmpty
+          ? getAllProductsStream() // All products stream
+          : searchProductsStream(query); // Search-specific stream
+    });
+  }
+
+  void clearSearch() {
+    FocusScope.of(context).unfocus(); // Close the keyboard
+    setState(() {
+      searchQuery = '';
+      productStream = getAllProductsStream(); // Reset to all products
+      searchController.clear(); // Clear the text in the search bar
+    });
   }
 
   @override
@@ -52,11 +72,17 @@ class _HomePageState extends State<HomePage> {
             children: [
               GreetingSection(name: name, image: image),
               const SizedBox(height: 20.0),
-              SearchBar(),
+              HomeSearchBar(
+                onSearch: onSearchQueryChanged,
+                searchQuery: searchQuery, // Pass current search query
+                onClear: clearSearch, // Use the clearSearch method
+              ),
               const SizedBox(height: 20.0),
-              CategorySection(),
-              const SizedBox(height: 20),
-              AllProductsSection(productStream: productStream),
+              if (searchQuery.isEmpty) ...[
+                CategorySection(),
+                const SizedBox(height: 20),
+              ],
+              AllProductsSection(productStream: productStream, searchQuery: searchQuery),
             ],
           ),
         ),
@@ -64,6 +90,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+
 
 
 class GreetingSection extends StatelessWidget {
@@ -82,7 +109,7 @@ class GreetingSection extends StatelessWidget {
           children: [
             Text(
               name != null ? 'Hey, $name' : 'Hey, Guest',
-              style: AppWidget.boldTextFieldStyle().copyWith(
+              style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: AppColors.darkGray,
@@ -136,6 +163,7 @@ class CategorySection extends StatelessWidget {
     "images/calculator.png",
     "images/drafting_tools.png",
   ];
+
   final List<String> categoryNames = [
     "TextBook",
     "Calculator",
@@ -147,7 +175,10 @@ class CategorySection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Categories', style: AppWidget.semiboldTextFieldStyle().copyWith(fontSize: 20)),
+        Text(
+          'Categories',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+        ),
         SizedBox(height: 20),
         Container(
           height: 150,
@@ -160,11 +191,15 @@ class CategorySection extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => CategoryProducts(category: categoryNames[index]),
+                      builder: (context) =>
+                          CategoryProducts(category: categoryNames[index]),
                     ),
                   );
                 },
-                child: CategoryCard(image: categories[index], title: categoryNames[index]),
+                child: CategoryCard(
+                  image: categories[index],
+                  title: categoryNames[index],
+                ),
               );
             },
           ),
@@ -206,18 +241,22 @@ class CategoryCard extends StatelessWidget {
 }
 
 class AllProductsSection extends StatelessWidget {
-  final Stream<QuerySnapshot> productStream;
+  final Stream<QuerySnapshot<Map<String, dynamic>>> productStream; // Keep this as is
+  final String searchQuery;
 
-  const AllProductsSection({Key? key, required this.productStream}) : super(key: key);
+  const AllProductsSection({Key? key, required this.productStream, required this.searchQuery}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Featured Products', style: AppWidget.semiboldTextFieldStyle().copyWith(fontSize: 20)), // Changed title to "Featured Products"
-        SizedBox(height: 20),
-        StreamBuilder<QuerySnapshot>(
+        Text(
+          searchQuery.isEmpty ? 'Featured Products' : 'Search Results',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 20),
+        StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
           stream: productStream,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
@@ -229,31 +268,61 @@ class AllProductsSection extends StatelessWidget {
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
               return Center(child: Text('No products available.'));
             }
-            print('Number of products fetched: ${snapshot.data!.docs.length}');
 
-            // Limit the number of displayed products (e.g., first 5)
-            final limitedProducts = snapshot.data!.docs.take(10).toList();
+            final products = snapshot.data!.docs;
 
-            return Container(
-              height: 250,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: limitedProducts.map((product) {
+            // If there's a search query, filter the products here
+            List<QueryDocumentSnapshot<Map<String, dynamic>>> filteredProducts;
+            if (searchQuery.isNotEmpty) {
+              filteredProducts = products.where((product) {
+                final data = product.data();
+                final nameMatches = data['name'].toString().toLowerCase().contains(searchQuery.toLowerCase());
+                final descriptionMatches = data['description'].toString().toLowerCase().contains(searchQuery.toLowerCase());
+                final categoryMatches = data['category'].toString().toLowerCase().contains(searchQuery.toLowerCase());
+                return nameMatches || descriptionMatches || categoryMatches;
+              }).toList();
+            } else {
+              filteredProducts = products; // No filtering
+            }
+
+            // Render the filtered list of products
+            if (searchQuery.isEmpty) {
+              return Container(
+                height: 250,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: products.map((product) {
+                    return HomeProductCard(
+                      product: product.data(),
+                    );
+                  }).toList(),
+                ),
+              );
+            } else {
+              return GridView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                ),
+                itemCount: filteredProducts.length,
+                itemBuilder: (context, index) {
+                  var product = filteredProducts[index];
                   return HomeProductCard(
-                    product: product.data() as Map<String, dynamic>,
-                    isFromHome: true,
+                    product: product.data(),
                   );
-                }).toList(),
-              ),
-            );
+                },
+              );
+            }
           },
         ),
-
-
       ],
     );
   }
 }
+
 
 
 
