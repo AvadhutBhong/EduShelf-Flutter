@@ -103,8 +103,8 @@ class _MyProductsPageState extends State<MyProductsPage> {
           if (snapshot.data!.docs.isEmpty) {
             return Center(
               child: Text(
-                "You haven't uploaded any products yet.",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                " You haven't\nuploaded any\n products yet.",
+                style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
               ),
             );
           }

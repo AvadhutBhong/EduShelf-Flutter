@@ -1,4 +1,5 @@
 import 'package:edu_shelf/colors.dart';
+import 'package:edu_shelf/services/shared_pref.dart';
 import 'package:edu_shelf/widgets/support_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +22,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
   userLogin() async {
     try{
-      await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      await SharedPreferenceHelper().saveUserId(userCredential.user!.uid);
       Navigator.pushNamed(context, '/bottomnav');
     }on FirebaseAuthException catch (e){
       if(e.code == "wrong-password"){

@@ -1,5 +1,7 @@
 import 'package:edu_shelf/services/shared_pref.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../Login_Files/login_screen.dart';
 import 'edit_profile_screen.dart';
 import 'my_products_page.dart';
 
@@ -37,6 +39,44 @@ class _ProfileState extends State<Profile> {
     setState(() {
       isDarkMode = value;
     });
+  }
+
+  Future<void> _logout(BuildContext context) async {
+     // Replace 'userIdKey' with your actual key
+
+    // Navigate to login screen (replace 'LoginScreen' with your actual login screen widget)
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginScreen()),
+    );
+  }
+
+  Future<void> showLogoutConfirmationDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Log Out'),
+          content: Text('Are you sure you want to log out from this account?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Log out'),
+              onPressed: () async {
+
+                await _logout(context);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -177,9 +217,9 @@ class _ProfileState extends State<Profile> {
                   fontSize: 18,
                 ),
               ),
-              onTap: () {
-                // Log out functionality
-              },
+              onTap: (){
+                showLogoutConfirmationDialog();
+              }
             ),
           ],
         ),

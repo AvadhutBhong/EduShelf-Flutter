@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:edu_shelf/screens/Chat_Files/personal_chat_screen.dart';
 import 'package:edu_shelf/widgets/support_widget.dart';
 import 'package:flutter/material.dart';
 
@@ -254,6 +255,8 @@ class _ProductDetailsState extends State<ProductDetails> {
                               child: ElevatedButton(
                                 onPressed: () {
                                   // Add your onPressed functionality here
+                                  print('ownerehjfewhjfbsdhbcdsbc'+ ownerId);
+                                  Navigator.push(context, MaterialPageRoute(builder: (_)=> ChatDetailScreen(ownerId: ownerId,)));
                                 },
                                 style: ElevatedButton.styleFrom(
                                   padding: EdgeInsets.symmetric(vertical: 12, horizontal: 30),

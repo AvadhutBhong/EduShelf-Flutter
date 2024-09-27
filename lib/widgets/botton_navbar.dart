@@ -1,14 +1,16 @@
-import 'package:edu_shelf/admin/admin_home.dart';
-import 'package:edu_shelf/admin/admin_login.dart';
-import 'package:edu_shelf/screens/pre_sell_screen.dart';
+import 'package:edu_shelf/services/shared_pref.dart';
 import 'package:flutter/material.dart';
-import 'package:edu_shelf/colors.dart';
 import 'package:edu_shelf/screens/Chat_Files/chat_screen.dart';
 import 'package:edu_shelf/screens/Homepage_files/home.dart';
 import 'package:edu_shelf/screens/Profile/profile.dart';
+import 'package:edu_shelf/screens/pre_sell_screen.dart';
+import 'package:edu_shelf/colors.dart';
+// import 'package:edu_shelf/Chat_Files/chat_functions.dart';
+
+import '../utils/chat_functions.dart';
 
 class BottomNavbar extends StatefulWidget {
-  const BottomNavbar({super.key});
+  const BottomNavbar({super.key, });
 
   @override
   State<BottomNavbar> createState() => _BottomNavbarState();
@@ -21,16 +23,20 @@ class _BottomNavbarState extends State<BottomNavbar> {
   late Profile profile;
   late ChatScreen chatScreen;
   int currentTabIndex = 0;
-
+  List<Map<String, dynamic>> userChats = [];
+  String? currentUserId;
   @override
   void initState() {
+    super.initState();
+
     homepage = HomePage();
     sellproduct = PreSellPage(); // This represents the "Sell Product" section
     profile = Profile();
-    chatScreen = ChatScreen();
+    chatScreen = ChatScreen(); // Pass userChats initially empty
     pages = [homepage, sellproduct, chatScreen, profile];
-    super.initState();
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +96,6 @@ class _BottomNavbarState extends State<BottomNavbar> {
               label: 'Profile',
             ),
           ],
-
         ),
       ),
       body: pages[currentTabIndex],
